@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sticky_headers/sticky_headers/widget.dart';
 
 import '../components/game_card.dart';
@@ -22,7 +23,12 @@ class IndexPage extends StatelessWidget {
               ),
               child: Column(
                 children: List.generate(5, (index) {
-                  return GameCard();
+                  return GestureDetector(
+                    onTap: () {
+                      context.pushNamed('game_info', pathParameters: {'id': '233'});
+                    },
+                    child: GameCard(),
+                  );
                 }),
               ),
             ),

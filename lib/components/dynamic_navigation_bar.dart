@@ -8,17 +8,20 @@ enum ScreenSize {
 }
 
 class Destination {
-  const Destination(this.title, this.icon, this.widget);
+  const Destination(this.title, this.icon, this.name);
 
   final String title;
   final Icon icon;
-  final Widget widget;
+  final String name;
 }
 
 class DynamicNavigationBar extends StatefulWidget {
+  final Widget body;
   final List<Destination> destinations;
+  final int currentPage;
+  final Function(int) onPageSelected;
 
-  const DynamicNavigationBar({super.key, required this.destinations});
+  const DynamicNavigationBar({super.key, required this.body, required this.destinations, required this.onPageSelected, required this.currentPage});
 
   @override
   State<DynamicNavigationBar> createState() => _DynamicNavigationBarState();
@@ -26,16 +29,12 @@ class DynamicNavigationBar extends StatefulWidget {
 }
 
 class _DynamicNavigationBarState extends State<DynamicNavigationBar> {
-  int currentPageIndex = 0;
 
   late ScreenSize screenSize;
-  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-
-    _pageController = PageController(initialPage: 0);
   }
 
   @override
@@ -52,17 +51,6 @@ class _DynamicNavigationBarState extends State<DynamicNavigationBar> {
     }
   }
 
-  void onDestinationSelected(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
-    );
-    setState(() {
-      currentPageIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     switch (screenSize) {
@@ -77,18 +65,14 @@ class _DynamicNavigationBarState extends State<DynamicNavigationBar> {
   Widget buildSmallPageNavigationBar() {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-        selectedIndex: currentPageIndex,
-        onDestinationSelected: onDestinationSelected,
+        selectedIndex: widget.currentPage,
+        onDestinationSelected: widget.onPageSelected,
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         destinations: widget.destinations
             .map((e) => NavigationDestination(icon: e.icon, label: e.title))
             .toList(),
       ),
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: widget.destinations.map((e) => e.widget).toList(),
-      ),
+      body: widget.body,
     );
   }
 
@@ -121,20 +105,16 @@ class _DynamicNavigationBarState extends State<DynamicNavigationBar> {
                   destinations: widget.destinations
                       .map((e) => NavigationRailDestination(icon: e.icon, label: Text(e.title)))
                       .toList(),
-                  selectedIndex: currentPageIndex,
+                  selectedIndex: widget.currentPage,
                   useIndicator: true,
-                  onDestinationSelected: onDestinationSelected,
+                  onDestinationSelected: widget.onPageSelected,
                 ),
               ),
             ),
             Expanded(
               child: Stack(
                 children: [
-                  PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: widget.destinations.map((e) => e.widget).toList(),
-                  ),
+                  widget.body,
                 ],
               ),
             ),
