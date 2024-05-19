@@ -8,11 +8,12 @@ enum ScreenSize {
 }
 
 class Destination {
-  const Destination(this.title, this.icon, this.name);
+  const Destination(this.title, this.icon, this.name, this.path);
 
   final String title;
   final Icon icon;
   final String name;
+  final String path;
 }
 
 class DynamicNavigationBar extends StatefulWidget {

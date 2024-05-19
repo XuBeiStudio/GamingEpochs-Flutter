@@ -15,7 +15,7 @@ class Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Card.filled(
       child: Padding(
         padding: EdgeInsets.symmetric(
           vertical: 4.r,
@@ -23,7 +23,7 @@ class Tag extends StatelessWidget {
         ),
         child: Text(
           content,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.labelMedium,
         ),
       ),
     );
@@ -38,16 +38,13 @@ class ContentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Theme.of(context).colorScheme.surface,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 24.r,
-          right: 24.r,
-          bottom: bottom ?? 8.r,
-        ),
-        child: child,
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 24.r,
+        right: 24.r,
+        bottom: bottom ?? 8.r,
       ),
+      child: child,
     );
   }
 }
@@ -110,46 +107,65 @@ class _GameInfoPageState extends State<GameInfoPage>
         direction: Axis.vertical,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InfoRow(Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          InfoRow(IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "发行商：Game Science",
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                      Text(
+                        "开发商：Game Science",
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text("开发商：Game Science"),
-                    Text("发行商：Game Science"),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconsExt.epic,
+                          IconsExt.steam,
+                          IconsExt.playstation,
+                          IconsExt.xbox,
+                          IconsExt.nintendo,
+                          IconsExt.apple,
+                          IconsExt.android,
+                        ]
+                            .map((e) => Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 1.r),
+                                  child: Icon(
+                                    e,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                    size: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium
+                                            ?.fontSize ??
+                                        12,
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                    Text(
+                      "预计 2024.08.20 发售",
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconsExt.epic,
-                      IconsExt.steam,
-                      IconsExt.playstation,
-                      IconsExt.xbox,
-                      IconsExt.nintendo,
-                      IconsExt.apple,
-                      IconsExt.android,
-                    ]
-                        .map((e) => Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 1.r),
-                              child: Icon(
-                                e,
-                                color: Colors.white,
-                                size: 12,
-                              ),
-                            ))
-                        .toList(),
-                  ),
-                  Text("预计 2024.08.20 发售"),
-                ],
-              ),
-            ],
+              ],
+            ),
           )),
           InfoRow(
             Wrap(
@@ -208,6 +224,7 @@ class _GameInfoPageState extends State<GameInfoPage>
     ];
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       appBar: AppBar(
         title: const Text("黑神话：悟空"),
         centerTitle: true,
@@ -229,80 +246,139 @@ class _GameInfoPageState extends State<GameInfoPage>
             image: const AssetImage("assets/cover.jpg"),
             fit: BoxFit.cover,
             width: 1.sw,
-            height: 128.r,
+            height: 128.r * 1.5,
           ),
-          ListView(
-            children: [
-              Container(
-                height: 128.r - 8.r,
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(8.r),
-                  topLeft: Radius.circular(8.r),
+          Padding(
+            padding: EdgeInsets.only(
+              top: 128.r * 0.6,
+            ),
+            child: Container(
+              width: double.infinity,
+              height: 128.r * 0.9,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [
+                    0.0,
+                    1.0,
+                  ],
+                  colors: [
+                    Theme.of(context).colorScheme.surfaceContainer.withOpacity(0),
+                    Theme.of(context).colorScheme.surfaceContainer,
+                  ],
                 ),
-                child: Container(
-                  color: Theme.of(context).colorScheme.surface,
-                  height: 8.r,
-                ),
               ),
-              ContentRow(
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: 12.r,
-                    bottom: 12.r - 8.r,
+            ),
+          ),
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 1024,
+              ),
+              child: ListView(
+                children: [
+                  Container(
+                    height: 128.r - 8.r,
                   ),
-                  child: Text(
-                    "黑神话：悟空",
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-              ),
-              ContentRow(
-                Card(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 12.r,
-                      horizontal: 18.r,
-                    ),
-                    child: Text(
-                      "距离游戏发售还有 100 天",
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: Container(
+                      color: Theme.of(context).colorScheme.surface,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                            height: 8.r,
                           ),
+                          ContentRow(
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: 12.r,
+                                bottom: 12.r - 8.r,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "黑神话：悟空",
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge,
+                                  ),
+                                  Text(
+                                    "Black Myth: WuKong",
+                                    style:
+                                        Theme.of(context).textTheme.titleSmall,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          ContentRow(
+                            Card.filled(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 12.r,
+                                  horizontal: 18.r,
+                                ),
+                                child: Text(
+                                  "距离游戏发售还有 100 天",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          ContentRow(
+                            StickyHeader(
+                              header: Container(
+                                color: Theme.of(context).colorScheme.surface,
+                                child: TabBar(
+                                  controller: _tabController,
+                                  tabs: const [
+                                    Tab(
+                                      text: "基本信息",
+                                    ),
+                                    Tab(
+                                      text: "游戏简介",
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              content: Padding(
+                                padding: EdgeInsets.only(
+                                  left: 12.r,
+                                  right: 12.r,
+                                  top: 8.r,
+                                  bottom: 16.r,
+                                ),
+                                child: tabs[tabIndex],
+                              ),
+                            ),
+                            bottom: 0,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                  Container(
+                    height: 16.r,
+                  ),
+                ],
               ),
-              ContentRow(
-                StickyHeader(
-                  header: Container(
-                    color: Theme.of(context).colorScheme.surface,
-                    child: TabBar(
-                      controller: _tabController,
-                      tabs: const [
-                        Tab(
-                          text: "基本信息",
-                        ),
-                        Tab(
-                          text: "游戏简介",
-                        ),
-                      ],
-                    ),
-                  ),
-                  content: Padding(
-                    padding: EdgeInsets.only(
-                      left: 12.r,
-                      right: 12.r,
-                      top: 8.r,
-                    ),
-                    child: tabs[tabIndex],
-                  ),
-                ),
-                bottom: 0,
-              ),
-            ],
+            ),
           ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //   ],
+          // ),
           // ListView(children: []),
         ],
       ),

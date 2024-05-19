@@ -2,12 +2,16 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:from_css_color/from_css_color.dart';
+import 'package:gaming_epochs/utils/http_utils.dart';
 
 import '../theme.dart';
 import '../icons.dart';
 
 class GameCard extends StatelessWidget {
-  const GameCard({super.key});
+  final GamesIndex game;
+
+  const GameCard({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
@@ -31,33 +35,35 @@ class GameCard extends StatelessWidget {
                 child: Stack(
                   children: [
                     // 封面图
-                    Image(
-                      image: const AssetImage("assets/cover.jpg"),
+                    Image.network(
+                      game.bg ?? "",
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: 720.w,
                     ),
                     // Logo
-                    Flex(
-                      direction: Axis.horizontal,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 6,
-                              horizontal: 12,
-                            ),
-                            child: const Image(
-                              image: AssetImage("assets/logo.png"),
-                              fit: BoxFit.contain,
-                              width: 96,
-                              height: 96,
+                    ...(game.logo != null ? [
+                      Flex(
+                        direction: Axis.horizontal,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 6,
+                                horizontal: 12,
+                              ),
+                              child: Image.network(
+                                game.logo!,
+                                fit: BoxFit.contain,
+                                width: 96,
+                                height: 96,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ] : []),
                     // 黑色渐变
                     Container(
                       decoration: const BoxDecoration(
@@ -84,9 +90,9 @@ class GameCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "黑神话：悟空",
+                            game.title ?? "加载中",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: fromCssColor(game.leftColor??"white"),
                               fontWeight: FontWeights.semiBold,
                               fontSize: 18,
                               shadows: [
@@ -98,21 +104,25 @@ class GameCard extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Text(
-                            "Black Myth: Wukong",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeights.medium,
-                              fontSize: 14,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.75),
-                                  offset: const Offset(1, 1),
-                                  blurRadius: 4,
-                                ),
-                              ],
-                            ),
-                          ),
+                          ...game.subtitle
+                                  ?.map((line) => Text(
+                                        line,
+                                        style: TextStyle(
+                                          color: fromCssColor(game.leftColor??"white"),
+                                          fontWeight: FontWeights.medium,
+                                          fontSize: 14,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black
+                                                  .withOpacity(0.75),
+                                              offset: const Offset(1, 1),
+                                              blurRadius: 4,
+                                            ),
+                                          ],
+                                        ),
+                                      ))
+                                  .toList() ??
+                              [],
                         ],
                       ),
                     ),
@@ -132,9 +142,9 @@ class GameCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                "2024.08.20",
+                                game.releaseDate ?? "",
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: fromCssColor(game.rightColor??"white"),
                                   fontWeight: FontWeights.semiBold,
                                   fontSize: 16,
                                   shadows: [
@@ -151,21 +161,14 @@ class GameCard extends StatelessWidget {
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconsExt.epic,
-                                  IconsExt.steam,
-                                  IconsExt.playstation,
-                                  IconsExt.xbox,
-                                  IconsExt.nintendo,
-                                  IconsExt.apple,
-                                  IconsExt.android,
-                                ]
+                                children: IconsExt
+                                    .fromList(game.platforms??[])
                                     .map((e) => Padding(
-                                          padding: EdgeInsets.symmetric(
+                                          padding: const EdgeInsets.symmetric(
                                               horizontal: 1.5),
                                           child: Icon(
                                             e,
-                                            color: Colors.white,
+                                            color: fromCssColor(game.rightColor??"white"),
                                             size: 14,
                                           ),
                                         ))
@@ -187,42 +190,46 @@ class GameCard extends StatelessWidget {
                           ),
                           child: Column(
                             children: [
-                              Container(
-                                width: 128,
-                                color: const Color.fromARGB(255, 16, 124, 16),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: 4,
-                                  ),
-                                  child: Text(
-                                    "Xbox Game Pass",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeights.normal,
-                                      fontSize: 12,
+                              ...(game.free?.contains("XGP")??false)?[
+                                Container(
+                                  width: 128,
+                                  color: const Color.fromARGB(255, 16, 124, 16),
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
+                                    child: Text(
+                                      "Xbox Game Pass",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeights.normal,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Container(
-                                width: 128,
-                                color: const Color.fromARGB(255, 0, 67, 156),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: 4,
-                                  ),
-                                  child: Text(
-                                    "PlayStation Plus",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeights.normal,
-                                      fontSize: 12,
+                              ]:[],
+                              ...(game.free?.contains("PSPlus")??false)?[
+                                Container(
+                                  width: 128,
+                                  color: const Color.fromARGB(255, 0, 67, 156),
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 4,
+                                    ),
+                                    child: Text(
+                                      "PlayStation Plus",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeights.normal,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
+                              ]:[],
                             ],
                           ),
                         ),
@@ -240,13 +247,15 @@ class GameCard extends StatelessWidget {
 }
 
 class MonthHeader extends StatelessWidget {
-  const MonthHeader({super.key});
+  final String month;
+
+  const MonthHeader({super.key, required this.month});
 
   @override
   Widget build(BuildContext context) {
     var text = Text(
-      "2024.08",
-      textAlign: TextAlign.right,
+      month,
+      textAlign: TextAlign.start,
       style: TextStyle(
         color: Theme.of(context).colorScheme.primary,
         fontWeight: FontWeights.bold,
