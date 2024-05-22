@@ -1,6 +1,7 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gaming_epochs/constants.dart';
 import 'package:gaming_epochs/models/primary_color_model.dart';
 import 'package:gaming_epochs/pages/game_info.dart';
@@ -13,12 +14,7 @@ import 'pages/index.dart';
 import 'pages/settings.dart';
 
 final destinations = [
-  const Destination(
-    '首页',
-    Icon(Icons.home),
-    'index',
-    '/index'
-  ),
+  const Destination('首页', Icon(Icons.home), 'index', '/index'),
   const Destination(
     '设置',
     Icon(Icons.settings),
@@ -99,6 +95,13 @@ final _router = GoRouter(
                     builder: (_) => const SettingsPrimaryColorDialogPage());
               },
             ),
+            GoRoute(
+              path: 'dev_team',
+              pageBuilder: (BuildContext context, GoRouterState state) {
+                return DialogPage(
+                    builder: (_) => const SettingsDevTeamDialogPage());
+              },
+            ),
           ],
         ),
       ],
@@ -107,7 +110,9 @@ final _router = GoRouter(
           body: page,
           destinations: destinations,
           currentPage: destinations.indexed
-                  .where((e) => e.$2.name == state.topRoute?.name || (state.fullPath?.startsWith(e.$2.path)??false))
+                  .where((e) =>
+                      e.$2.name == state.topRoute?.name ||
+                      (state.fullPath?.startsWith(e.$2.path) ?? false))
                   .firstOrNull
                   ?.$1 ??
               0,
@@ -127,7 +132,10 @@ final _router = GoRouter(
       },
     ),
   ],
-  observers: [BotToastNavigatorObserver()],
+  observers: [
+    BotToastNavigatorObserver(),
+    FlutterSmartDialog.observer,
+  ],
 );
 
 class App extends StatelessWidget {
@@ -187,10 +195,15 @@ class _StatefulApp extends State<StatefulApp> {
           theme: buildTheme(Brightness.light, model.primaryColor),
           darkTheme: buildTheme(Brightness.dark, model.primaryColor),
           routerConfig: _router,
-          builder: (context, child) {
-            child = botToastBuilder(context, child);
-            return child;
-          },
+          builder: FlutterSmartDialog.init(
+            builder: (context, child) {
+              child = botToastBuilder(context, child);
+              return child;
+            },
+            loadingBuilder: (text) {
+              return LoadingDialogPage(title: text);
+            },
+          ),
         ),
       ),
     );

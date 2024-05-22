@@ -74,4 +74,6 @@ android {
 
 project.flutter.source = "../.."
 
-dependencies {}
+dependencies {
+    implementation("cn.hutool:hutool-all:5.8.25")
+}
