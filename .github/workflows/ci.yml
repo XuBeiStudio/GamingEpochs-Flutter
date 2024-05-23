@@ -58,14 +58,14 @@ jobs:
         run: |
           echo "$KEYSTORE_UPLOAD" | base64 --decode > ./android/upload.jks
           flutter build apk --flavor common
-          flutter build apk --flavor google
-          flutter build apk --flavor huawei
-          flutter build appbundle --flavor common
-          flutter build appbundle --flavor google
-          flutter build appbundle --flavor huawei
+#          flutter build apk --flavor google
+#          flutter build apk --flavor huawei
+#          flutter build appbundle --flavor common
+#          flutter build appbundle --flavor google
+#          flutter build appbundle --flavor huawei
           cd android
           chmod +x ./gradlew
-          ./gradlew publishGoogleReleaseListing publishGoogleReleaseBundle
+          ./gradlew bundleRelease assembleRelease publishGoogleReleaseListing publishGoogleReleaseBundle
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
