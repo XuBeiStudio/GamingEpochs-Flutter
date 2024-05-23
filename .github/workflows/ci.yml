@@ -43,7 +43,7 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd: |
-            ver="$(yq ".version" demo.yaml)"
+            ver="$(yq ".version" pubspec.yaml)"
             readarray -d + -t parts <<< "$ver"
             echo "VERSION=${parts[0]}" >> $GITHUB_ENV
             echo "VERSION_NUM=${parts[1]}" >> $GITHUB_ENV
