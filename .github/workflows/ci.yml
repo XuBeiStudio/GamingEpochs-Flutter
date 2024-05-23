@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '8'
+          java-version: '21'
 
       - name: Setup Gradle 🐘
         uses: gradle/gradle-build-action@v3
@@ -48,15 +48,6 @@ jobs:
           echo "VERSION_NUM=${parts[1]}" >> $GITHUB_ENV
           update="$(cat update.txt)"
           echo "v${parts[0]}\n$update" > ./android/app/src/google/play/release-notes/zh-CN/default.txt
-
-      - name: Init flutter
-        run: |
-          flutter pub get
-          flutter pub run pigeon \
-            --input ./pigeons/calendar.dart \
-            --dart_out ./lib/pigeons/calendar.dart \
-            --kotlin_out ./android/app/src/main/kotlin/com/liziyi0914/gamingepochs/pigeons/Calendar.kt \
-            --kotlin_package com.liziyi0914.gamingepochs.pigeons
 
       - name: Build Android 🏗️
         env:

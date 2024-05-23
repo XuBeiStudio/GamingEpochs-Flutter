@@ -44,7 +44,3 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
-
-# Pigeon生成文件
-lib/pigeons
-android/app/src/main/kotlin/com/liziyi0914/gamingepochs/pigeons
