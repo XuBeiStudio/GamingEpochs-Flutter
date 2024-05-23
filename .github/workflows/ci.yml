@@ -64,9 +64,11 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           ANDROID_PUBLISHER_CREDENTIALS : ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
         run: |
+          flutter build apk
+          flutter build appbundle
           cd android
           chmod +x ./gradlew
-          ./gradlew bundleRelease assembleRelease publishGoogleReleaseListing publishGoogleReleaseBundle
+          ./gradlew publishGoogleReleaseListing publishGoogleReleaseBundle
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
