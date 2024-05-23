@@ -54,7 +54,9 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           ANDROID_PUBLISHER_CREDENTIALS : ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
+          KEYSTORE_UPLOAD: ${{ secrets.KEYSTORE_UPLOAD }}
         run: |
+          echo "$KEYSTORE_UPLOAD" | base64 --decode > ./android/upload.jks
           flutter build apk
           flutter build appbundle
           cd android
