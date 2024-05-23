@@ -40,15 +40,14 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/develop' }}
 
       - name: Get Version
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            ver="$(yq ".version" pubspec.yaml)"
-            readarray -d + -t parts <<< "$ver"
-            echo "VERSION=${parts[0]}" >> $GITHUB_ENV
-            echo "VERSION_NUM=${parts[1]}" >> $GITHUB_ENV
-            update="$(cat update.txt)"
-            echo "v${parts[0]}\n$update" > app/src/google/play/release-notes/zh-CN/default.txt
+        run: |
+          chmod +x ./tools/yq
+          ver="$(./tools/yq ".version" pubspec.yaml)"
+          readarray -d + -t parts <<< "$ver"
+          echo "VERSION=${parts[0]}" >> $GITHUB_ENV
+          echo "VERSION_NUM=${parts[1]}" >> $GITHUB_ENV
+          update="$(cat update.txt)"
+          echo "v${parts[0]}\n$update" > app/src/google/play/release-notes/zh-CN/default.txt
 
       - name: Init flutter
         run: |
