@@ -1,0 +1,82 @@
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - develop
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-android:
+    concurrency: ci-${{ github.ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+          cache: true
+
+      - name: Setup Java ☕
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle 🐘
+        uses: gradle/gradle-build-action@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/develop' }}
+
+      - name: Get Version
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            ver="$(./yq ".version" demo.yaml)"
+            readarray -d + -t parts <<< "$ver"
+            echo "VERSION=${parts[0]}" >> $GITHUB_ENV
+            echo "VERSION_NUM=${parts[1]}" >> $GITHUB_ENV
+            update=$(cat update.txt)
+            echo "v${parts[0]}\n$update" > app/src/google/play/release-notes/zh-CN/default.txt
+
+      - name: Init flutter
+        run: |
+          flutter pub get
+          flutter pub run pigeon \
+            --input ./pigeons/calendar.dart \
+            --dart_out ./lib/pigeons/calendar.dart \
+            --kotlin_out ./android/app/src/main/kotlin/com/liziyi0914/gamingepochs/pigeons/Calendar.kt \
+            --kotlin_package com.liziyi0914.gamingepochs.pigeons
+
+      - name: Build Android 🏗️
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ANDROID_PUBLISHER_CREDENTIALS : ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew bundleRelease assembleRelease publishGoogleReleaseListing publishGoogleReleaseBundle
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{env.VERSION}}_${{env.VERSION_NUM}}
+          name: "Gaming Epochs v${{env.VERSION}}_${{env.VERSION_NUM}}"
+          body: ""
+#          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            build/app/outputs/apk/*/*/*.apk
+            build/app/outputs/bundle/*/*.aab
