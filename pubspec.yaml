@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+24
+version: 1.0.1+25
 
 environment:
   sdk: '>=3.3.3 <4.0.0'
@@ -63,6 +63,7 @@ dev_dependencies:
   flutter_lints: ^3.0.0
 
   pigeon: ^18.0.0
+  msix: ^3.16.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -80,7 +81,6 @@ flutter:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   assets:
-    - assets/cover.jpg
     - assets/logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -132,3 +132,15 @@ flutter:
     - family: GamePlatforms
       fonts:
         - asset: fonts/game_platforms.ttf
+
+msix_config:
+  display_name: 游历年轴
+  publisher_display_name: liziyi0914
+  identity_name: 2915860507443.2680361736A1A
+  publisher: CN=F3739577-71FD-4FDF-9715-404CA9F6FA77
+  logo_path: assets\logo.png
+  capabilities: internetClient
+  languages: zh-cn
+  app_uri_handler_hosts: gaming-epochs.liziyi0914.com
+  install_certificate: false
+  store: true

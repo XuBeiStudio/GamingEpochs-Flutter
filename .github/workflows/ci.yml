@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Flutter
+      - name: Setup Flutter 🚀
         uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -39,10 +39,10 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/develop' }}
 
-      - name: Get Version
+      - name: Get Version 💯
         run: |
-          chmod +x ./tools/yq
-          ver="$(./tools/yq ".version" pubspec.yaml)"
+          chmod +x ./tools/yq_linux_amd64
+          ver="$(./tools/yq_linux_amd64 ".version" pubspec.yaml)"
           readarray -d + -t parts <<< "$ver"
           echo "VERSION=${parts[0]}" >> $GITHUB_ENV
           echo "VERSION_NUM=${parts[1]}" >> $GITHUB_ENV
@@ -62,13 +62,56 @@ jobs:
           chmod +x ./gradlew
           ./gradlew bundleRelease assembleRelease publishGoogleReleaseListing publishGoogleReleaseBundle
 
-      - name: Upload Release
+      - name: Upload Release 🆙
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{env.VERSION}}_${{env.VERSION_NUM}}
           name: "Gaming Epochs v${{env.VERSION}}_${{env.VERSION_NUM}}"
           body: ""
-#          token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             build/app/outputs/apk/*/*/*.apk
             build/app/outputs/bundle/*/*.aab
+
+  build-windows:
+    concurrency: ci-${{ github.ref }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Flutter 🚀
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get Version 💯
+        run: |
+          $ver = (.\tools\yq_windows_amd64.exe ".version" pubspec.yaml)
+          $parts = $ver -split '\+'
+          "VERSION={0}" -f $parts[0] | Add-Content -Path $GITHUB_ENV
+          "VERSION_NUM={0}" -f $parts[1] | Add-Content -Path $GITHUB_ENV
+
+      - name: Build Windows 🏗️
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ANDROID_PUBLISHER_CREDENTIALS : ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
+          KEYSTORE_UPLOAD: ${{ secrets.KEYSTORE_UPLOAD }}
+          VERSION: ${{env.VERSION}}
+        run: |
+          flutter build windows
+          7z a -tzip .\build\windows\x64\runner\Release\GamingEpochs-v${env:VERSION}-release.zip .\build\windows\x64\runner\Release\*
+          dart run msix:create -n GamingEpochs-v${env:VERSION}-release
+
+      - name: Upload Release 🆙
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{env.VERSION}}_${{env.VERSION_NUM}}
+          name: "Gaming Epochs v${{env.VERSION}}_${{env.VERSION_NUM}}"
+          body: ""
+          files: |
+            build\windows\x64\runner\Release\*.zip
+            build\windows\x64\runner\Release\*.msix
