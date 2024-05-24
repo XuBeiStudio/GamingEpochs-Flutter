@@ -113,5 +113,5 @@ jobs:
           name: "Gaming Epochs v${{env.VERSION}}_${{env.VERSION_NUM}}"
           body: ""
           files: |
-            build\windows\x64\runner\Release\*.zip
-            build\windows\x64\runner\Release\*.msix
+            build/windows/x64/runner/Release/*.zip
+            build/windows/x64/runner/Release/*.msix
