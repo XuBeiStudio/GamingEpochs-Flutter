@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build-android:
-    concurrency: ci-${{ github.ref }}
+    concurrency: ci-android-${{ github.ref }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -73,7 +73,7 @@ jobs:
             build/app/outputs/bundle/*/*.aab
 
   build-windows:
-    concurrency: ci-${{ github.ref }}
+    concurrency: ci-windows-${{ github.ref }}
     runs-on: windows-latest
     steps:
       - name: Checkout 🛎️
@@ -91,8 +91,8 @@ jobs:
         run: |
           $ver = (.\tools\yq_windows_amd64.exe ".version" pubspec.yaml)
           $parts = $ver -split '\+'
-          "VERSION={0}" -f $parts[0] | Add-Content -Path $GITHUB_ENV
-          "VERSION_NUM={0}" -f $parts[1] | Add-Content -Path $GITHUB_ENV
+          "VERSION={0}" -f $parts[0] | Add-Content -Path $env:GITHUB_ENV
+          "VERSION_NUM={0}" -f $parts[1] | Add-Content -Path $env:GITHUB_ENV
 
       - name: Build Windows 🏗️
         env:
