@@ -44,7 +44,8 @@ android {
     defaultConfig {
         applicationId = "com.liziyi0914.gamingepochs"
 
-        minSdk = project.flutter.getProperty("minSdkVersion") as Int?
+//        minSdk = project.flutter.getProperty("minSdkVersion") as Int?
+        minSdk = 23
         targetSdk = project.flutter.getProperty("targetSdkVersion") as Int?
         versionCode = flutterVersionCode.toInt()
         versionName = flutterVersionName
@@ -52,6 +53,29 @@ android {
         buildConfigField("String", "BUILD_TIME", "\"${buildTime}\"")
 
         setProperty("archivesBaseName", "${projectName}-v${versionName}")
+
+        ndk {
+            //选择要添加的对应 cpu 类型的 .so 库。
+            abiFilters += listOf("armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            // 还可以添加 'x86', 'x86_64', 'mips', 'mips64'
+
+            debugSymbolLevel = "FULL"
+        }
+
+        manifestPlaceholders["CHANNEL"] = "Common"
+
+        manifestPlaceholders["JPUSH_PKGNAME"] = applicationId!!
+        manifestPlaceholders["JPUSH_APPKEY"] = "7213d236a7c0d1912bd12bda" //JPush 上注册的包名对应的 Appkey.
+        manifestPlaceholders["JPUSH_CHANNEL"] = "common" //暂时填写默认值即可.
+//        manifestPlaceholders["MEIZU_APPKEY"] = "MZ-魅族的APPKEY"
+//        manifestPlaceholders["MEIZU_APPID"] = "MZ-魅族的APPID"
+//        manifestPlaceholders["XIAOMI_APPID"] = "MI-小米的APPID"
+//        manifestPlaceholders["XIAOMI_APPKEY"] = "MI-小米的APPKEY"
+//        manifestPlaceholders["OPPO_APPKEY"] = "OP-oppo的APPKEY"
+//        manifestPlaceholders["OPPO_APPID"] = "OP-oppo的APPID"
+//        manifestPlaceholders["OPPO_APPSECRET"] = "OP-oppo的APPSECRET"
+//        manifestPlaceholders["VIVO_APPKEY"] = "vivo的APPKEY"
+//        manifestPlaceholders["VIVO_APPID"] = "vivo的APPID"
     }
 
     signingConfigs {
@@ -126,5 +150,24 @@ play {
 project.flutter.source = "../.."
 
 dependencies {
+    // region 极光推送
+//    implementation("cn.jiguang.sdk:jcore:2.7.2")
+//    implementation("cn.jiguang.sdk:jpush:5.2.2")
+    implementation("cn.jiguang.sdk:jpush-google:5.2.4")
+    // 接入华为厂商
+//    implementation("com.huawei.hms:push:6.12.0.300")
+//    implementation("cn.jiguang.sdk.plugin:huawei:5.2.2")
+    // 接入 FCM 厂商
+//    implementation("cn.jiguang.sdk.plugin:fcm:5.2.2")
+    // 接入魅族厂商
+//    implementation("cn.jiguang.sdk.plugin:meizu:5.2.2")
+    // 接入 VIVO 厂商
+//    implementation("cn.jiguang.sdk.plugin:vivo:5.2.2")
+    // 接入 OPPO 厂商
+//    implementation("cn.jiguang.sdk.plugin:oppo:5.2.2")
+    // 接入小米厂商
+//    implementation("cn.jiguang.sdk.plugin:xiaomi:5.2.2")
+    // endregion
+
     implementation("cn.hutool:hutool-all:5.8.26")
 }

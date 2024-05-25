@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
+import 'package:gaming_epochs/pages/settings.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
@@ -89,6 +91,8 @@ class _GameInfoPageState extends State<GameInfoPage>
   late bool released;
   late DateTime releaseDate;
 
+  late Future<(Game, String)> future;
+
   int tabIndex = 0;
 
   @override
@@ -105,22 +109,24 @@ class _GameInfoPageState extends State<GameInfoPage>
     game = null;
     released = false;
     releaseDate = DateTime.fromMicrosecondsSinceEpoch(0);
-    getGameInfo(widget.id).then((value) {
-      var date = dateFormat.parse(value.releaseDate ?? "1970.01.01");
+
+    introduction = null;
+
+    future = Future(() async {
+      var gameAsync = await getGameInfo(widget.id);
+      var introductionAsync = await getGameIntroduction(widget.id);
+
+      var date = dateFormat.parse(gameAsync.releaseDate ?? "1970.01.01");
       var today = DateTime.now();
 
       setState(() {
-        game = value;
+        game = gameAsync;
+        introduction = introductionAsync;
         releaseDate = date;
         released = today.isAfter(date);
       });
-    });
 
-    introduction = null;
-    getGameIntroduction(widget.id).then((value) {
-      setState(() {
-        introduction = value;
-      });
+      return (gameAsync, introductionAsync);
     });
   }
 
@@ -299,109 +305,121 @@ class _GameInfoPageState extends State<GameInfoPage>
               ),
             ),
           ),
-          //游戏名
           Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 1024,
-              ),
-              child: ListView(
-                children: [
-                  Container(
-                    height: 128.r - 8.r,
+            child: FutureBuilder(
+              future: future,
+              builder: (BuildContext context, AsyncSnapshot<(Game, String)> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
+
+                if (snapshot.hasError) {
+                  return Text("${snapshot.error}");
+                }
+
+                return ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 1024,
                   ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.r),
-                    child: Container(
-                      color: Theme.of(context).colorScheme.surface,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            height: 8.r,
-                          ),
-                          ContentRow(
-                            Padding(
-                              padding: EdgeInsets.only(
-                                top: 12.r,
-                                bottom: 12.r - 8.r,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    game?.name?.locale("zh_CN") ?? "Unknown",
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
-                                  ),
-                                  Text(
-                                    game?.name?.locale("en_US") ?? "Unknown",
-                                    style:
-                                        Theme.of(context).textTheme.titleSmall,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (!released)
-                          ContentRow(
-                            Card.filled(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 12.r,
-                                  horizontal: 18.r,
-                                ),
-                                child: Text(
-                                  "距离游戏发售还有 ${releaseDate.difference(DateTime.now()).inDays} 天",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
-                                      ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          ContentRow(
-                            StickyHeader(
-                              header: Container(
-                                color: Theme.of(context).colorScheme.surface,
-                                child: TabBar(
-                                  controller: _tabController,
-                                  tabs: const [
-                                    Tab(
-                                      text: "基本信息",
-                                    ),
-                                    Tab(
-                                      text: "游戏简介",
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              content: Padding(
-                                padding: EdgeInsets.only(
-                                  left: 12.r,
-                                  right: 12.r,
-                                  top: 8.r,
-                                  bottom: 16.r,
-                                ),
-                                child: tabs[tabIndex],
-                              ),
-                            ),
-                            bottom: 0,
-                          ),
-                        ],
+                  child: ListView(
+                    children: [
+                      Container(
+                        height: 128.r - 8.r,
                       ),
-                    ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8.r),
+                        child: Container(
+                          color: Theme.of(context).colorScheme.surface,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Container(
+                                height: 8.r,
+                              ),
+                              ContentRow(
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: 12.r,
+                                    bottom: 12.r - 8.r,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        game?.name?.locale("zh_CN") ?? "Unknown",
+                                        style:
+                                        Theme.of(context).textTheme.titleLarge,
+                                      ),
+                                      Text(
+                                        game?.name?.locale("en_US") ?? "Unknown",
+                                        style:
+                                        Theme.of(context).textTheme.titleSmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (!released)
+                                ContentRow(
+                                  Card.filled(
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 12.r,
+                                        horizontal: 18.r,
+                                      ),
+                                      child: Text(
+                                        "距离游戏发售还有 ${releaseDate.difference(DateTime.now()).inDays} 天",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ContentRow(
+                                StickyHeader(
+                                  header: Container(
+                                    color: Theme.of(context).colorScheme.surface,
+                                    child: TabBar(
+                                      controller: _tabController,
+                                      tabs: const [
+                                        Tab(
+                                          text: "基本信息",
+                                        ),
+                                        Tab(
+                                          text: "游戏简介",
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  content: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 12.r,
+                                      right: 12.r,
+                                      top: 8.r,
+                                      bottom: 16.r,
+                                    ),
+                                    child: tabs[tabIndex],
+                                  ),
+                                ),
+                                bottom: 0,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        height: 16.r,
+                      ),
+                    ],
                   ),
-                  Container(
-                    height: 16.r,
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],

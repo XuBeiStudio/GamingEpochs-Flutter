@@ -43,6 +43,8 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
 
   late SharedPreferences? prefs;
 
+  late Future<List<MapEntry<String, List<GamesIndex>>>> future;
+
   final DateFormat monthFormat = DateFormat("yyyy.MM");
 
   Future<void> updateCalendar(List<GamesIndex> indexes) async {
@@ -75,7 +77,7 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
     );
     SmartDialog.showLoading(
       builder: (context) {
-        return LoadingDialogPage(
+        return LoadingDialog(
           title: "数据更新中",
           info: "0%",
           update: (f) => update = f,
@@ -134,7 +136,9 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
 
     gamesIndexes = [];
 
-    getIndexes().then((data) async {
+    future = Future(() async {
+      var data = await getIndexes();
+
       Map<String, List<GamesIndex>> map = {};
 
       for (var element in data) {
@@ -174,6 +178,8 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
       scrollController.jumpTo(offset);
 
       updateCalendar(data).then((_){});
+
+      return list;
     });
   }
 
@@ -186,32 +192,57 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
           child: ListView(
             controller: scrollController,
             padding: EdgeInsets.zero,
-            children: gamesIndexes
-                .map((monthGroup) => StickyHeader(
-                      // key: Key('header-$index'),
-                      header: MonthHeader(
-                        month: monthGroup.key,
+            children: [
+              FutureBuilder(
+                future: future,
+                builder: (BuildContext context, AsyncSnapshot<List<MapEntry<String, List<GamesIndex>>>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.r),
+                        child: const CircularProgressIndicator(),
                       ),
-                      content: Padding(
-                        padding: EdgeInsets.only(
-                          top: 4.r,
-                          bottom: 4.r,
-                        ),
-                        child: Column(
-                          children: monthGroup.value
-                              .map((g) => GestureDetector(
-                                    onTap: () {
-                                      context.push('/game/${g.id}');
-                                    },
-                                    child: GameCard(
-                                      game: g,
-                                    ),
-                                  ))
-                              .toList(),
-                        ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.r),
+                        child: Text("${snapshot.error}"),
+                      ),
+                    );
+                  }
+
+                  return Container();
+                },
+              ),
+              ...gamesIndexes
+                  .map((monthGroup) => StickyHeader(
+                // key: Key('header-$index'),
+                header: MonthHeader(
+                  month: monthGroup.key,
+                ),
+                content: Padding(
+                  padding: EdgeInsets.only(
+                    top: 4.r,
+                    bottom: 4.r,
+                  ),
+                  child: Column(
+                    children: monthGroup.value
+                        .map((g) => GestureDetector(
+                      onTap: () {
+                        context.push('/game/${g.id}');
+                      },
+                      child: GameCard(
+                        game: g,
                       ),
                     ))
-                .toList(),
+                        .toList(),
+                  ),
+                ),
+              )),
+            ],
           ),
         ),
         FadeTransition(

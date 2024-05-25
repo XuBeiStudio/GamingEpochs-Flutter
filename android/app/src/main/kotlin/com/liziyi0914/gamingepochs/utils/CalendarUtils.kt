@@ -9,8 +9,8 @@ import android.os.Build
 import android.provider.CalendarContract
 import android.util.Log
 import cn.hutool.core.date.DateUtil
-import com.liziyi0914.gamingepochs.pigeons.CalendarApi
-import com.liziyi0914.gamingepochs.pigeons.GameCalendarInfo
+import com.liziyi0914.gamingepochs.pigeons.calendar.CalendarApi
+import com.liziyi0914.gamingepochs.pigeons.calendar.GameCalendarInfo
 
 private val EVENT_PROJECTION: Array<String> = arrayOf(
     CalendarContract.Calendars._ID,                     // 0
@@ -29,7 +29,7 @@ private const val ACCOUNT_NAME = "游历年轴"
 private const val OWNER_ACCOUNT = "cn.xu-bei.gaming_epochs.calendar"
 
 
-class Calendar(private var context: Context) : CalendarApi {
+class CalendarUtils(private var context: Context) : CalendarApi {
     override fun createAccount(callback: (Result<Long>) -> Unit) {
         callback(Result.success(createAccount(context)))
     }

@@ -5,6 +5,8 @@ import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gaming_epochs/constants.dart';
 import 'package:gaming_epochs/models/primary_color_model.dart';
 import 'package:gaming_epochs/pages/game_info.dart';
+import 'package:gaming_epochs/pigeons/jpush.dart';
+import 'package:gaming_epochs/utils/platform_utils.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -169,9 +171,18 @@ class _StatefulApp extends State<StatefulApp> {
 
     prefs = null;
 
-    SharedPreferences.getInstance().then((prefs) => setState(() {
-          this.prefs = prefs;
-        }));
+    SharedPreferences.getInstance().then((prefs) async {
+      setState(() {
+        this.prefs = prefs;
+      });
+
+      if (PlatformUtils.isAndroid) {
+        var jpush = JPushApi();
+        await jpush.setDebug(true);
+        await jpush.setAuth(prefs.getBool(PrefKeys.enablePush) == true);
+        await jpush.init();
+      }
+    });
   }
 
   ThemeData buildTheme(Brightness brightness, Color primaryColor) {
@@ -201,7 +212,7 @@ class _StatefulApp extends State<StatefulApp> {
               return child;
             },
             loadingBuilder: (text) {
-              return LoadingDialogPage(title: text);
+              return LoadingDialog(title: text);
             },
           ),
         ),

@@ -1,5 +1,6 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gaming_epochs/models/primary_color_model.dart';
@@ -13,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../constants.dart';
 import '../pigeons/calendar.dart';
+import '../pigeons/jpush.dart';
 
 class SettingsPrimaryColorDialogPage extends StatefulWidget {
   const SettingsPrimaryColorDialogPage({super.key});
@@ -236,19 +238,18 @@ class _SettingsDevTeamDialogPage extends State<SettingsDevTeamDialogPage> {
   }
 }
 
-class LoadingDialogPage extends StatefulWidget {
+class LoadingDialog extends StatefulWidget {
   final String title;
   final Function(void Function(String))? update;
   final String? info;
 
-  const LoadingDialogPage(
-      {super.key, required this.title, this.update, this.info});
+  const LoadingDialog({super.key, required this.title, this.update, this.info});
 
   @override
-  State<StatefulWidget> createState() => _LoadingDialogPage();
+  State<StatefulWidget> createState() => _LoadingDialog();
 }
 
-class _LoadingDialogPage extends State<LoadingDialogPage> {
+class _LoadingDialog extends State<LoadingDialog> {
   late String info;
 
   @override
@@ -292,6 +293,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPage extends State<SettingsPage> {
   late PackageInfo? packageInfo;
   late SharedPreferences? prefs;
+  late String? registrationId;
 
   late bool enableCalendar;
   late bool enablePush;
@@ -315,6 +317,14 @@ class _SettingsPage extends State<SettingsPage> {
           enableCalendar = prefs.getBool(PrefKeys.enableCalendar) ?? false;
           enablePush = prefs.getBool(PrefKeys.enablePush) ?? false;
         }));
+
+    registrationId = null;
+    if (PlatformUtils.isAndroid) {
+      var jpush = JPushApi();
+      jpush.getRegistrationID().then((id) => setState(() {
+            registrationId = id;
+          }));
+    }
   }
 
   Widget subtitle(String title) {
@@ -348,24 +358,20 @@ class _SettingsPage extends State<SettingsPage> {
           vertical: 16.r,
           horizontal: 8.r,
         ),
-        child: Flex(
-          direction: Axis.horizontal,
+        child: Row(
           children: [
-            Flexible(
-              flex: 0,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: 0,
-                  horizontal: 16.r,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      icon,
-                    ),
-                  ],
-                ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 0,
+                horizontal: 16.r,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -390,20 +396,12 @@ class _SettingsPage extends State<SettingsPage> {
             ),
             ...(extra != null
                 ? [
-                    Flexible(
-                      flex: 0,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 0,
-                          horizontal: 8.r,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            extra,
-                          ],
-                        ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 0,
+                        horizontal: 8.r,
                       ),
+                      child: extra,
                     ),
                   ]
                 : []),
@@ -427,7 +425,7 @@ class _SettingsPage extends State<SettingsPage> {
           );
           SmartDialog.showLoading(
             builder: (context) {
-              return LoadingDialogPage(
+              return LoadingDialog(
                 title: "导入中",
                 info: "0%",
                 update: (f) => update = f,
@@ -455,8 +453,7 @@ class _SettingsPage extends State<SettingsPage> {
               ids.add(index.id!);
             }
             current++;
-            update
-                .call("${(current * 1000 / total).round().toDouble() / 10}%");
+            update.call("${(current * 1000 / total).round().toDouble() / 10}%");
           }
           await prefs?.setStringList(PrefKeys.cachedEvents, ids);
 
@@ -494,8 +491,28 @@ class _SettingsPage extends State<SettingsPage> {
     }
   }
 
-  void updatePushState(bool state) {
-    BotToast.showText(text: "暂时不支持此平台");
+  Future<void> updatePushState(bool state) async {
+    if (PlatformUtils.isAndroid) {
+      // 获取权限
+      var status = await Permission.notification.request();
+      if (status.isGranted || status.isProvisional) {
+        var api = JPushApi();
+        await api.setAuth(state);
+      } else if (status.isPermanentlyDenied) {
+        BotToast.showText(text: "请授予通知相关权限");
+        openAppSettings();
+      } else {
+        state = !state;
+        BotToast.showText(text: "请授予通知相关权限");
+      }
+
+      setState(() {
+        enablePush = state;
+        prefs?.setBool(PrefKeys.enablePush, state);
+      });
+    } else {
+      BotToast.showText(text: "暂时不支持此平台");
+    }
   }
 
   @override
@@ -571,18 +588,31 @@ class _SettingsPage extends State<SettingsPage> {
               description: "接收游戏发售提醒推送",
               extra: Switch(
                 value: enablePush,
-                onChanged: (value) {
-                  updatePushState(!enablePush);
+                onChanged: (value) async {
+                  await updatePushState(!enablePush);
                 },
               ),
-              onTap: () {
-                updatePushState(!enablePush);
+              onTap: () async {
+                await updatePushState(!enablePush);
               },
             ),
           ),
           Flexible(
             child: subtitle("其它"),
           ),
+          if (PlatformUtils.isAndroid)
+            Flexible(
+              child: listItem(
+                context: context,
+                icon: Icons.bug_report,
+                title: "Registration ID",
+                description: registrationId ?? "",
+                onTap: () async {
+                  Clipboard.setData(ClipboardData(text: registrationId ?? ""));
+                  BotToast.showText(text: "复制成功");
+                },
+              ),
+            ),
           Flexible(
             child: listItem(
               context: context,
