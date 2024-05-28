@@ -143,8 +143,8 @@ android {
         outputs.all {
             if (this instanceof com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
                 def suffix = outputFileName.split(".").last()
-                outputFileName =
-                    "${projectName}-v${versionName}-${flavorName}-${buildType.name}.${suffix}"
+                outputFileName = "${projectName}-v${versionName}-${flavorName}-${buildType.name}.${suffix}"
+                println("outputFileName: ${outputFileName}")
             }
         }
     }
@@ -174,11 +174,9 @@ dependencies {
 //    implementation("cn.jiguang.sdk:jpush:5.2.2")
     implementation "cn.jiguang.sdk:jpush-google:${jgVersion}"
     // 接入华为厂商
-//    implementation("com.huawei.agconnect:agconnect-core:1.9.1.301")
-//    implementation("com.huawei.hms:push:6.12.0.300")
-//    implementation("cn.jiguang.sdk.plugin:huawei:${jgVersion}")
-//    implementation("com.huawei.hms:push:6.12.0.300")
-//    implementation("cn.jiguang.sdk.plugin:huawei:5.2.2")
+    implementation "com.huawei.agconnect:agconnect-core:1.9.1.301"
+    implementation "cn.jiguang.sdk.plugin:huawei:${jgVersion}"
+    implementation "com.huawei.hms:push:6.12.0.300"
     // 接入 FCM 厂商
 //    implementation("cn.jiguang.sdk.plugin:fcm:5.2.2")
     // 接入魅族厂商
@@ -197,3 +195,5 @@ dependencies {
 
     implementation("cn.hutool:hutool-all:5.8.26")
 }
+
+apply plugin: 'com.huawei.agconnect'
