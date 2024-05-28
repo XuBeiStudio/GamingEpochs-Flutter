@@ -12,7 +12,8 @@ plugins {
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
-    localPropertiesFile.bufferedReader(Charsets.UTF_8).use { reader -> localProperties.load(reader) }
+    localPropertiesFile.bufferedReader(Charsets.UTF_8)
+        .use { reader -> localProperties.load(reader) }
 }
 
 val flutterVersionCode = localProperties.getProperty("flutter.versionCode") ?: "1"
@@ -76,6 +77,7 @@ android {
 //        manifestPlaceholders["OPPO_APPSECRET"] = "OP-oppo的APPSECRET"
 //        manifestPlaceholders["VIVO_APPKEY"] = "vivo的APPKEY"
 //        manifestPlaceholders["VIVO_APPID"] = "vivo的APPID"
+        manifestPlaceholders["HONOR_APPID"] = "104446275"
     }
 
     signingConfigs {
@@ -84,6 +86,12 @@ android {
             storePassword = System.getenv("KEYSTORE_PASSWORD")
             keyAlias = "upload"
             keyPassword = System.getenv("KEY_PASSWORD")
+        }
+        getByName("debug") {
+            storeFile = rootProject.file("upload.jks")
+            storePassword = localProperties.getProperty("storePassword") ?: ""
+            keyAlias = "upload"
+            keyPassword = localProperties.getProperty("keyPassword") ?: ""
         }
     }
 
@@ -104,6 +112,11 @@ android {
             manifestPlaceholders["CHANNEL"] = "Huawei"
             manifestPlaceholders["JPUSH_CHANNEL"] = "Huawei"
         }
+        create("honor") {
+            dimension = "vendor"
+            manifestPlaceholders["CHANNEL"] = "Honor"
+            manifestPlaceholders["JPUSH_CHANNEL"] = "Honor"
+        }
     }
 
     buildTypes {
@@ -113,7 +126,18 @@ android {
 //            signingConfig signingConfigs.debug
             isMinifyEnabled = true
             signingConfig = signingConfigs.getByName("upload")
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        debug {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -127,7 +151,8 @@ android {
         outputs.all {
             if (this is com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
                 val suffix = outputFileName.split(".").last()
-                outputFileName = "${projectName}-v${versionName}-${flavorName}-${buildType.name}.${suffix}"
+                outputFileName =
+                    "${projectName}-v${versionName}-${flavorName}-${buildType.name}.${suffix}"
             }
         }
     }
@@ -150,11 +175,16 @@ play {
 project.flutter.source = "../.."
 
 dependencies {
+    val jgVersion = "5.3.1"
+
     // region 极光推送
 //    implementation("cn.jiguang.sdk:jcore:2.7.2")
 //    implementation("cn.jiguang.sdk:jpush:5.2.2")
-    implementation("cn.jiguang.sdk:jpush-google:5.2.4")
+    implementation("cn.jiguang.sdk:jpush-google:${jgVersion}")
     // 接入华为厂商
+//    implementation("com.huawei.agconnect:agconnect-core:1.9.1.301")
+//    implementation("com.huawei.hms:push:6.12.0.300")
+//    implementation("cn.jiguang.sdk.plugin:huawei:${jgVersion}")
 //    implementation("com.huawei.hms:push:6.12.0.300")
 //    implementation("cn.jiguang.sdk.plugin:huawei:5.2.2")
     // 接入 FCM 厂商
@@ -167,6 +197,15 @@ dependencies {
 //    implementation("cn.jiguang.sdk.plugin:oppo:5.2.2")
     // 接入小米厂商
 //    implementation("cn.jiguang.sdk.plugin:xiaomi:5.2.2")
+    // 接入荣耀厂商
+    implementation("cn.jiguang.sdk.plugin:honor:${jgVersion}")
+    //引入 libs 中的 aar，如果项目中有此依赖不需要重复引用
+    implementation(
+        fileTree().apply {
+            include("*.jar", "*.aar")
+            setDir("libs")
+        }
+    )
     // endregion
 
     implementation("cn.hutool:hutool-all:5.8.26")
