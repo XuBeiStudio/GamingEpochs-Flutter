@@ -1,0 +1,199 @@
+import java.text.SimpleDateFormat
+
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.github.triplet.play" version "3.9.0"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader("UTF-8") { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+if (flutterVersionCode == null) {
+    flutterVersionCode = "1"
+}
+
+def flutterVersionName = localProperties.getProperty("flutter.versionName")
+if (flutterVersionName == null) {
+    flutterVersionName = "1.0"
+}
+
+def projectName = "GamingEpochs"
+def buildTime = new SimpleDateFormat("yyMMdd.HHmmss").format(new Date())
+
+android {
+    namespace = "com.liziyi0914.gamingepochs"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+//    kotlinOptions {
+//        jvmTarget = "1.8"
+//    }
+
+    sourceSets {
+        named("main") {
+            java.srcDir("src/main/kotlin")
+        }
+    }
+
+    defaultConfig {
+        applicationId = "com.liziyi0914.gamingepochs"
+
+//        minSdk = project.flutter.getProperty("minSdkVersion") as Int?
+        minSdk = 23
+        targetSdk = project.flutter.getProperty("targetSdkVersion")
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
+
+        buildConfigField("String", "BUILD_TIME", "\"${buildTime}\"")
+
+        setProperty("archivesBaseName", "${projectName}-v${versionName}")
+
+        ndk {
+            //选择要添加的对应 cpu 类型的 .so 库。
+            abiFilters "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            // 还可以添加 'x86', 'x86_64', 'mips', 'mips64'
+
+            debugSymbolLevel = "FULL"
+        }
+
+        manifestPlaceholders = [
+            JPUSH_PKGNAME : applicationId,
+            JPUSH_APPKEY : "7213d236a7c0d1912bd12bda",
+            JPUSH_CHANNEL : "common",
+            HONOR_APPID : "104446275",
+        ]
+    }
+
+    signingConfigs {
+        upload {
+            storeFile file("../upload.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = "upload"
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+        debug {
+            storeFile file("../upload.jks")
+            storePassword localProperties.getProperty("storePassword")
+            keyAlias "upload"
+            keyPassword localProperties.getProperty("keyPassword")
+        }
+    }
+
+    productFlavors {
+        flavorDimensions += "vendor"
+        common {
+            dimension = "vendor"
+            manifestPlaceholders["CHANNEL"] = "Common"
+            manifestPlaceholders["JPUSH_CHANNEL"] = "Common"
+        }
+//        create("google") {
+//            dimension = "vendor"
+//            manifestPlaceholders["CHANNEL"] = "Google"
+//            manifestPlaceholders["JPUSH_CHANNEL"] = "Google"
+//        }
+//        create("huawei") {
+//            dimension = "vendor"
+//            manifestPlaceholders["CHANNEL"] = "Huawei"
+//            manifestPlaceholders["JPUSH_CHANNEL"] = "Huawei"
+//        }
+//        create("honor") {
+//            dimension = "vendor"
+//            manifestPlaceholders["CHANNEL"] = "Honor"
+//            manifestPlaceholders["JPUSH_CHANNEL"] = "Honor"
+//        }
+    }
+
+    buildTypes {
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+//            signingConfig signingConfigs.debug
+            minifyEnabled true
+            signingConfig signingConfigs.upload
+            proguardFiles 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+            proguardFiles 'proguard-rules.pro'
+        }
+    }
+
+    playConfigs {
+        register("googleRelease") {
+            enabled.set(true)
+        }
+    }
+
+    applicationVariants.all {
+        outputs.all {
+            if (this instanceof com.android.build.gradle.internal.api.BaseVariantOutputImpl) {
+                def suffix = outputFileName.split(".").last()
+                outputFileName =
+                    "${projectName}-v${versionName}-${flavorName}-${buildType.name}.${suffix}"
+            }
+        }
+    }
+}
+
+play {
+    enabled.set(false)
+}
+
+//
+//flutter {
+//    source '../..'
+//}
+//
+
+//tasks.getByName<FlutterExtension>("flutter") {
+//    source = "../.."
+//}
+
+project.flutter.source = "../.."
+
+dependencies {
+    def jgVersion = "5.3.1"
+
+    // region 极光推送
+//    implementation("cn.jiguang.sdk:jcore:2.7.2")
+//    implementation("cn.jiguang.sdk:jpush:5.2.2")
+    implementation "cn.jiguang.sdk:jpush-google:${jgVersion}"
+    // 接入华为厂商
+//    implementation("com.huawei.agconnect:agconnect-core:1.9.1.301")
+//    implementation("com.huawei.hms:push:6.12.0.300")
+//    implementation("cn.jiguang.sdk.plugin:huawei:${jgVersion}")
+//    implementation("com.huawei.hms:push:6.12.0.300")
+//    implementation("cn.jiguang.sdk.plugin:huawei:5.2.2")
+    // 接入 FCM 厂商
+//    implementation("cn.jiguang.sdk.plugin:fcm:5.2.2")
+    // 接入魅族厂商
+//    implementation("cn.jiguang.sdk.plugin:meizu:5.2.2")
+    // 接入 VIVO 厂商
+//    implementation("cn.jiguang.sdk.plugin:vivo:5.2.2")
+    // 接入 OPPO 厂商
+//    implementation("cn.jiguang.sdk.plugin:oppo:5.2.2")
+    // 接入小米厂商
+//    implementation("cn.jiguang.sdk.plugin:xiaomi:5.2.2")
+    // 接入荣耀厂商
+    implementation("cn.jiguang.sdk.plugin:honor:${jgVersion}")
+    //引入 libs 中的 aar，如果项目中有此依赖不需要重复引用
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    // endregion
+
+    implementation("cn.hutool:hutool-all:5.8.26")
+}
