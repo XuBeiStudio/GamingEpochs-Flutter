@@ -101,21 +101,21 @@ android {
             manifestPlaceholders["CHANNEL"] = "Common"
             manifestPlaceholders["JPUSH_CHANNEL"] = "Common"
         }
-//        create("google") {
-//            dimension = "vendor"
-//            manifestPlaceholders["CHANNEL"] = "Google"
-//            manifestPlaceholders["JPUSH_CHANNEL"] = "Google"
-//        }
-//        create("huawei") {
-//            dimension = "vendor"
-//            manifestPlaceholders["CHANNEL"] = "Huawei"
-//            manifestPlaceholders["JPUSH_CHANNEL"] = "Huawei"
-//        }
-//        create("honor") {
-//            dimension = "vendor"
-//            manifestPlaceholders["CHANNEL"] = "Honor"
-//            manifestPlaceholders["JPUSH_CHANNEL"] = "Honor"
-//        }
+        google {
+            dimension = "vendor"
+            manifestPlaceholders["CHANNEL"] = "Google"
+            manifestPlaceholders["JPUSH_CHANNEL"] = "Google"
+        }
+        huawei {
+            dimension = "vendor"
+            manifestPlaceholders["CHANNEL"] = "Huawei"
+            manifestPlaceholders["JPUSH_CHANNEL"] = "Huawei"
+        }
+        honor {
+            dimension = "vendor"
+            manifestPlaceholders["CHANNEL"] = "Honor"
+            manifestPlaceholders["JPUSH_CHANNEL"] = "Honor"
+        }
     }
 
     buildTypes {
