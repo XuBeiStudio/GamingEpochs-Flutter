@@ -6,6 +6,7 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
     id "com.github.triplet.play" version "3.9.0"
+    id 'com.google.gms.google-services'
 }
 
 def localProperties = new Properties()
@@ -178,7 +179,9 @@ dependencies {
     implementation "cn.jiguang.sdk.plugin:huawei:${jgVersion}"
     implementation "com.huawei.hms:push:6.12.0.300"
     // 接入 FCM 厂商
-//    implementation("cn.jiguang.sdk.plugin:fcm:5.2.2")
+    implementation "cn.jiguang.sdk.plugin:fcm:${jgVersion}"
+    implementation platform("com.google.firebase:firebase-bom:33.0.0")
+    implementation 'com.google.firebase:firebase-messaging'
     // 接入魅族厂商
 //    implementation("cn.jiguang.sdk.plugin:meizu:5.2.2")
     // 接入 VIVO 厂商

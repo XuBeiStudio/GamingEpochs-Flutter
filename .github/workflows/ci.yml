@@ -55,8 +55,10 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           ANDROID_PUBLISHER_CREDENTIALS : ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
           KEYSTORE_UPLOAD: ${{ secrets.KEYSTORE_UPLOAD }}
+          AGC_SERVICE: ${{ secrets.AGC_SERVICE }}
         run: |
           echo "$KEYSTORE_UPLOAD" | base64 --decode > ./android/upload.jks
+          echo "$AGC_SERVICE" > ./android/app/agconnect-services.json
           flutter build apk --flavor common
           cd android
           chmod +x ./gradlew

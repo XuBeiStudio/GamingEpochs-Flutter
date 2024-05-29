@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "779623346293",
+    "project_id": "gamingepochs",
+    "storage_bucket": "gamingepochs.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:779623346293:android:7ad38f492315f607f4c83c",
+        "android_client_info": {
+          "package_name": "com.liziyi0914.gamingepochs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8IgnVoQojcUbKKO-WaJVG35Bxvui0p3Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
