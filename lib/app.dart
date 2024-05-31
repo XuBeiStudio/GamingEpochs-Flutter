@@ -104,6 +104,13 @@ final _router = GoRouter(
                     builder: (_) => const SettingsDevTeamDialogPage());
               },
             ),
+            GoRoute(
+              path: 'calendar',
+              pageBuilder: (BuildContext context, GoRouterState state) {
+                return DialogPage(
+                    builder: (_) => const SettingsCalendarUrlDialogPage());
+              },
+            ),
           ],
         ),
       ],

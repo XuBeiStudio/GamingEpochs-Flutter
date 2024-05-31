@@ -48,7 +48,7 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
   final DateFormat monthFormat = DateFormat("yyyy.MM");
 
   Future<void> updateCalendar(List<GamesIndex> indexes) async {
-    if (!(prefs?.getBool(PrefKeys.enableCalendar)??false)) {
+    if (!(prefs?.getBool(PrefKeys.enableCalendar) ?? false)) {
       return;
     }
 
@@ -102,8 +102,7 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
         ),
       );
       current++;
-      update
-          .call("${(current * 1000 / total).round().toDouble() / 10}%");
+      update.call("${(current * 1000 / total).round().toDouble() / 10}%");
     }
     await prefs?.setStringList(PrefKeys.cachedEvents, ids);
 
@@ -117,8 +116,8 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
     super.initState();
 
     SharedPreferences.getInstance().then((prefs) => setState(() {
-      this.prefs = prefs;
-    }));
+          this.prefs = prefs;
+        }));
 
     scrollController.addListener(() {
       if (scrollController.offset < 500 && showToTopBtn) {
@@ -161,10 +160,10 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
       }
 
       var offset = 0.0;
-      var thisMonth = monthFormat.format(DateTime.now());
+      var thisMonth = double.parse(monthFormat.format(DateTime.now()));
 
       for (var e in list) {
-        if (!e.key.startsWith(thisMonth)) {
+        if (double.parse(e.key) > thisMonth) {
           offset += 72 + 4.r * 2 + e.value.length * (4.r * 2 + 180);
         } else {
           break;
@@ -177,7 +176,7 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
 
       scrollController.jumpTo(offset);
 
-      updateCalendar(data).then((_){});
+      updateCalendar(data).then((_) {});
 
       return list;
     });
@@ -195,7 +194,9 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
             children: [
               FutureBuilder(
                 future: future,
-                builder: (BuildContext context, AsyncSnapshot<List<MapEntry<String, List<GamesIndex>>>> snapshot) {
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<MapEntry<String, List<GamesIndex>>>>
+                        snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
                       child: Padding(
@@ -217,31 +218,30 @@ class _IndexPage extends State<IndexPage> with TickerProviderStateMixin {
                   return Container();
                 },
               ),
-              ...gamesIndexes
-                  .map((monthGroup) => StickyHeader(
-                // key: Key('header-$index'),
-                header: MonthHeader(
-                  month: monthGroup.key,
-                ),
-                content: Padding(
-                  padding: EdgeInsets.only(
-                    top: 4.r,
-                    bottom: 4.r,
-                  ),
-                  child: Column(
-                    children: monthGroup.value
-                        .map((g) => GestureDetector(
-                      onTap: () {
-                        context.push('/game/${g.id}');
-                      },
-                      child: GameCard(
-                        game: g,
+              ...gamesIndexes.map((monthGroup) => StickyHeader(
+                    // key: Key('header-$index'),
+                    header: MonthHeader(
+                      month: monthGroup.key,
+                    ),
+                    content: Padding(
+                      padding: EdgeInsets.only(
+                        top: 4.r,
+                        bottom: 4.r,
                       ),
-                    ))
-                        .toList(),
-                  ),
-                ),
-              )),
+                      child: Column(
+                        children: monthGroup.value
+                            .map((g) => GestureDetector(
+                                  onTap: () {
+                                    context.push('/game/${g.id}');
+                                  },
+                                  child: GameCard(
+                                    game: g,
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  )),
             ],
           ),
         ),

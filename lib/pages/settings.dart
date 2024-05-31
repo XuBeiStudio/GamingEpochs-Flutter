@@ -16,6 +16,51 @@ import '../constants.dart';
 import '../pigeons/calendar.dart';
 import '../pigeons/jpush.dart';
 
+class SettingsCalendarUrlDialogPage extends StatefulWidget {
+  const SettingsCalendarUrlDialogPage({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _SettingsCalendarUrlDialogPage();
+}
+
+class _SettingsCalendarUrlDialogPage
+    extends State<SettingsCalendarUrlDialogPage> {
+  static const url = "https://gaming-epochs.vercel.app/calendar.ics";
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("日历订阅URL"),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text("请在日历APP中订阅以下URL"),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: TextEditingController(
+                    text: url,
+                  ),
+                  readOnly: true,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Clipboard.setData(const ClipboardData(text: url));
+                  BotToast.showText(text: "已复制到剪贴板");
+                },
+                child: const Text("复制"),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class SettingsPrimaryColorDialogPage extends StatefulWidget {
   const SettingsPrimaryColorDialogPage({super.key});
 
@@ -412,7 +457,7 @@ class _SettingsPage extends State<SettingsPage> {
   }
 
   Future<void> updateCalendarState(bool state) async {
-    if (PlatformUtils.isAndroid) {
+    if (SupportUtils.supportCalendar) {
       // 获取权限
       var status = await Permission.calendarFullAccess.request();
       if (status.isGranted || status.isProvisional) {
@@ -492,7 +537,7 @@ class _SettingsPage extends State<SettingsPage> {
   }
 
   Future<void> updatePushState(bool state) async {
-    if (PlatformUtils.isAndroid) {
+    if (SupportUtils.supportPush) {
       // 获取权限
       var status = await Permission.notification.request();
       if (status.isGranted || status.isProvisional) {
@@ -563,44 +608,57 @@ class _SettingsPage extends State<SettingsPage> {
               },
             ),
           ),
+          if (SupportUtils.supportCalendar)
+            Flexible(
+              child: listItem(
+                context: context,
+                icon: Icons.calendar_month,
+                title: "订阅日历",
+                description: "自动订阅游戏发售时间到日历",
+                extra: Switch(
+                  value: enableCalendar,
+                  onChanged: (value) async {
+                    await updateCalendarState(!enableCalendar);
+                  },
+                ),
+                onTap: () async {
+                  await updateCalendarState(!enableCalendar);
+                },
+              ),
+            ),
           Flexible(
             child: listItem(
               context: context,
               icon: Icons.calendar_month,
-              title: "日历",
-              description: "订阅游戏发售时间到日历",
-              extra: Switch(
-                value: enableCalendar,
-                onChanged: (value) async {
-                  await updateCalendarState(!enableCalendar);
-                },
-              ),
-              onTap: () async {
-                await updateCalendarState(!enableCalendar);
+              title: "添加日历",
+              description: "手动添加游戏发售时间到日历",
+              onTap: () {
+                context.push("/settings/calendar");
               },
             ),
           ),
-          Flexible(
-            child: listItem(
-              context: context,
-              icon: Icons.send,
-              title: "推送",
-              description: "接收游戏发售提醒推送",
-              extra: Switch(
-                value: enablePush,
-                onChanged: (value) async {
+          if (SupportUtils.supportPush)
+            Flexible(
+              child: listItem(
+                context: context,
+                icon: Icons.send,
+                title: "推送",
+                description: "接收游戏发售提醒推送",
+                extra: Switch(
+                  value: enablePush,
+                  onChanged: (value) async {
+                    await updatePushState(!enablePush);
+                  },
+                ),
+                onTap: () async {
                   await updatePushState(!enablePush);
                 },
               ),
-              onTap: () async {
-                await updatePushState(!enablePush);
-              },
             ),
-          ),
           Flexible(
             child: subtitle("其它"),
           ),
-          if (PlatformUtils.isAndroid)
+          if (SupportUtils.supportPush)
             Flexible(
               child: listItem(
                 context: context,

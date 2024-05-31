@@ -44,3 +44,17 @@ class PlatformUtils {
 
   static bool get isLinux => _isLinux();
 }
+
+class SupportUtils {
+  static bool _supportPush() {
+    return PlatformUtils.isAndroid;
+  }
+
+  static bool _supportCalendar() {
+    return PlatformUtils.isAndroid;
+  }
+
+  static bool get supportPush => _supportPush();
+
+  static bool get supportCalendar => _supportCalendar();
+}
