@@ -105,8 +105,8 @@ jobs:
           VERSION: ${{env.VERSION}}
         run: |
           flutter build windows
-          7z a -tzip .\build\windows\x64\runner\Release\GamingEpochs-v${env:VERSION}-release.zip .\build\windows\x64\runner\Release\*
-          dart run msix:create -n GamingEpochs-v${env:VERSION}-release
+          7z a -tzip .\build\windows\x64\runner\Release\GamingEpochs-v${env:VERSION}-windows-x86_64-release.zip .\build\windows\x64\runner\Release\*
+          dart run msix:create -n GamingEpochs-v${env:VERSION}-windows-x86_64-release
 
       - name: Upload Release 🆙
         uses: softprops/action-gh-release@v2
@@ -117,3 +117,70 @@ jobs:
           files: |
             build/windows/x64/runner/Release/*.zip
             build/windows/x64/runner/Release/*.msix
+
+  build-web:
+    concurrency: ci-web-${{ github.ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Flutter 🚀
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Setup Node 📦
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - name: Get Version 💯
+        run: |
+          chmod +x ./tools/yq_linux_amd64
+          ver="$(./tools/yq_linux_amd64 ".version" pubspec.yaml)"
+          readarray -d + -t parts <<< "$ver"
+          echo "VERSION=${parts[0]}" >> $GITHUB_ENV
+          echo "VERSION_NUM=${parts[1]}" >> $GITHUB_ENV
+
+      - name: Build Web 🏗️
+        run: |
+          cd web-project
+          yarn install
+          yarn build
+          cd ..
+          flutter build web
+
+      - name: Upload COS 🚀
+        uses: zkqiang/tencent-cos-action@v0.1.0
+        with:
+          args: upload -rs build/web/ /
+          secret_id: ${{ secrets.TENCENT_SECRET_ID }}
+          secret_key: ${{ secrets.TENCENT_SECRET_KEY }}
+          bucket: ${{ secrets.TENCENT_BUCKET }}
+          region: ap-guangzhou
+
+      - name: Flush CDN 🧹
+        env:
+          TENCENT_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENT_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+        run: |
+          chmod +x ./refresh_cdn.sh
+          ./refresh_cdn.sh
+
+      - name: Compress dist 📦
+        run: |
+          7z a -tzip ./build/web/GamingEpochs-v${env:VERSION}-web-release.zip ./build/web/*
+
+      - name: Upload Release 🆙
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{env.VERSION}}_${{env.VERSION_NUM}}
+          name: "Gaming Epochs v${{env.VERSION}}_${{env.VERSION_NUM}}"
+          body: ""
+          files: |
+            build/web/*.zip

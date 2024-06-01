@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:gaming_epochs/constants.dart';
+import 'package:gaming_epochs/dialogs/settings_web_push_dialog.dart';
 import 'package:gaming_epochs/models/primary_color_model.dart';
 import 'package:gaming_epochs/pages/game_info.dart';
 import 'package:gaming_epochs/pigeons/jpush.dart';
@@ -12,6 +13,10 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'components/dynamic_navigation_bar.dart';
+import 'dialogs/loading_dialog.dart';
+import 'dialogs/settings_calendar_url_dialog.dart';
+import 'dialogs/settings_dev_team_dialog.dart';
+import 'dialogs/settings_primary_color_dialog.dart';
 import 'pages/index.dart';
 import 'pages/settings.dart';
 
@@ -109,6 +114,13 @@ final _router = GoRouter(
               pageBuilder: (BuildContext context, GoRouterState state) {
                 return DialogPage(
                     builder: (_) => const SettingsCalendarUrlDialogPage());
+              },
+            ),
+            GoRoute(
+              path: 'web_push',
+              pageBuilder: (BuildContext context, GoRouterState state) {
+                return DialogPage(
+                    builder: (_) => const SettingsWebPushDialogPage());
               },
             ),
           ],

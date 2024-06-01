@@ -1,46 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+    <!--
+      If you are serving your web app in a path other than the root, change the
+      href value below to reflect the base path you are serving from.
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+      The path provided below has to start and end with a slash "/" in order for
+      it to work correctly.
 
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+      For more details:
+      * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
 
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
+      This is a placeholder for base href that will be replaced by the value of
+      the `--base-href` argument provided to `flutter build`.
+    -->
+    <base href="$FLUTTER_BASE_HREF">
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="游历年轴">
+    <meta charset="UTF-8">
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+    <meta name="description" content="游历年轴">
 
-  <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="gaming_epochs">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <!-- iOS meta tags & icons -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="gaming_epochs">
+    <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>gaming_epochs</title>
-  <link rel="manifest" href="manifest.json">
+    <title>gaming_epochs</title>
+    <link rel="manifest" href="manifest.json">
 
-  <script>
-    // The value below is injected by flutter build, do not touch.
-    const serviceWorkerVersion = null;
-  </script>
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
+    <script>
+        // The value below is injected by flutter build, do not touch.
+        const serviceWorkerVersion = null;
+    </script>
+    <!-- This script adds the flutter initialization JS code -->
+    <script src="flutter.js" defer></script>
 </head>
 <body>
-  <script>
+<script>
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({
@@ -54,6 +54,118 @@
         }
       });
     });
-  </script>
+</script>
+<script>
+    var agConnectConfig = {
+      "agcgw":{
+          "backurl":"connect-drcn.hispace.hicloud.com",
+          "url":"connect-drcn.dbankcloud.cn",
+          "websocketbackurl":"connect-ws-drcn.hispace.dbankcloud.com",
+          "websocketurl":"connect-ws-drcn.hispace.dbankcloud.cn"
+      },
+      "agcgw_all":{
+          "CN":"connect-drcn.dbankcloud.cn",
+          "CN_back":"connect-drcn.hispace.hicloud.com",
+          "DE":"connect-dre.dbankcloud.cn",
+          "DE_back":"connect-dre.hispace.hicloud.com",
+          "RU":"connect-drru.hispace.dbankcloud.ru",
+          "RU_back":"connect-drru.hispace.dbankcloud.cn",
+          "SG":"connect-dra.dbankcloud.cn",
+          "SG_back":"connect-dra.hispace.hicloud.com"
+      },
+      "websocketgw_all":{
+          "CN":"connect-ws-drcn.hispace.dbankcloud.cn",
+          "CN_back":"connect-ws-drcn.hispace.dbankcloud.com",
+          "DE":"connect-ws-dre.hispace.dbankcloud.cn",
+          "DE_back":"connect-ws-dre.hispace.dbankcloud.com",
+          "RU":"connect-ws-drru.hispace.dbankcloud.ru",
+          "RU_back":"connect-ws-drru.hispace.dbankcloud.cn",
+          "SG":"connect-ws-dra.hispace.dbankcloud.cn",
+          "SG_back":"connect-ws-dra.hispace.dbankcloud.com"
+      },
+      "client":{
+          "cp_id":"30086000783771921",
+          "product_id":"388421841222182651",
+          "project_id":"388421841222182651",
+          "app_id":"172249065903220865"
+      },
+      "oauth_client":{
+          "client_id":"111138871",
+          "client_type":7
+      },
+      "app_info":{
+          "app_id":"172249065903220865"
+      },
+      "service":{
+          "analytics":{
+              "collector_url":"datacollector-drcn.dt.hicloud.com,datacollector-drcn.dt.dbankcloud.cn",
+              "collector_url_ru":"datacollector-drru.dt.dbankcloud.ru,datacollector-drru.dt.hicloud.com",
+              "collector_url_sg":"datacollector-dra.dt.hicloud.com,datacollector-dra.dt.dbankcloud.cn",
+              "collector_url_de":"datacollector-dre.dt.hicloud.com,datacollector-dre.dt.dbankcloud.cn",
+              "collector_url_cn":"datacollector-drcn.dt.hicloud.com,datacollector-drcn.dt.dbankcloud.cn",
+              "resource_id":"p1",
+              "channel_id":""
+          },
+          "edukit":{
+              "edu_url":"edukit.cloud.huawei.com.cn",
+              "dh_url":"edukit.cloud.huawei.com.cn"
+          },
+          "search":{
+              "url":"https://search-drcn.cloud.huawei.com"
+          },
+          "cloudstorage":{
+              "storage_url_sg_back":"https://agc-storage-dra.cloud.huawei.asia",
+              "storage_url_ru_back":"https://agc-storage-drru.cloud.huawei.ru",
+              "storage_url_ru":"https://agc-storage-drru.cloud.huawei.ru",
+              "storage_url_de_back":"https://agc-storage-dre.cloud.huawei.eu",
+              "storage_url_de":"https://ops-dre.agcstorage.link",
+              "storage_url":"https://agc-storage-drcn.platform.dbankcloud.cn",
+              "storage_url_sg":"https://ops-dra.agcstorage.link",
+              "storage_url_cn_back":"https://agc-storage-drcn.cloud.huawei.com.cn",
+              "storage_url_cn":"https://agc-storage-drcn.platform.dbankcloud.cn"
+          },
+          "ml":{
+              "mlservice_url":"ml-api-drcn.ai.dbankcloud.com,ml-api-drcn.ai.dbankcloud.cn"
+          }
+      },
+      "region":"CN",
+      "configuration_version":"3.0"
+  };
+</script>
+<script src="https://push-static.dbankcdn.com/hms-messaging.js"></script>
+<script>
+    //Your web app's hms configuration
+    var hmsConfig = {
+        "apiKey":"kApbVc33LCrNr3uFPzAQ9HMRrXuYP1qLHjShEMrp",
+        "projectId":"388421841222182651",
+        "clientId":"111138871",
+        "countryCode":"CN"
+    };
+
+    //Initialize Hms
+    hms.initializeApp(hmsConfig);
+
+    const hmsMessaging = hms.messaging();
+    hmsMessaging.usePublicVapidKey(
+        "BOQhlbnrHrtJE0dZULhW0Bh-GW8mN_bYkw_lmBj942nIDHC3PZ9hBCEkZr5UYkVmvp7l911NCoJENkXPZ0QOwzU");
+
+    console.log('[HMS] Messaging initialized.')
+    console.log(hmsMessaging)
+
+    hmsMessaging.onMessage((payload) => {
+        const notificationTitle = payload.notification.title;
+
+        new Notification(notificationTitle, payload.notification);
+    });
+
+    globalThis.getHmsToken = async () => {
+        return await hmsMessaging.getToken();
+    };
+
+    globalThis.deleteHmsToken = async (token) => {
+        return await hmsMessaging.deleteToken(token);
+    };
+</script>
+<script src="/scripts/main.js"></script>
 </body>
 </html>

@@ -1,9 +1,10 @@
+import 'dart:js_interop';
+
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
-import 'package:gaming_epochs/models/primary_color_model.dart';
 import 'package:gaming_epochs/utils/http_utils.dart';
 import 'package:gaming_epochs/utils/platform_utils.dart';
 import 'package:go_router/go_router.dart';
@@ -12,321 +13,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../platforms/web_push/web.dart';
 import '../constants.dart';
+import '../dialogs/loading_dialog.dart';
 import '../pigeons/calendar.dart';
 import '../pigeons/jpush.dart';
-
-class SettingsCalendarUrlDialogPage extends StatefulWidget {
-  const SettingsCalendarUrlDialogPage({super.key});
-
-  @override
-  State<StatefulWidget> createState() => _SettingsCalendarUrlDialogPage();
-}
-
-class _SettingsCalendarUrlDialogPage
-    extends State<SettingsCalendarUrlDialogPage> {
-  static const url = "https://gaming-epochs.vercel.app/calendar.ics";
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("日历订阅URL"),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text("请在日历APP中订阅以下URL"),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: TextEditingController(
-                    text: url,
-                  ),
-                  readOnly: true,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Clipboard.setData(const ClipboardData(text: url));
-                  BotToast.showText(text: "已复制到剪贴板");
-                },
-                child: const Text("复制"),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class SettingsPrimaryColorDialogPage extends StatefulWidget {
-  const SettingsPrimaryColorDialogPage({super.key});
-
-  @override
-  State<StatefulWidget> createState() => _SettingsPrimaryColorDialogPage();
-}
-
-class _SettingsPrimaryColorDialogPage
-    extends State<SettingsPrimaryColorDialogPage> {
-  late SharedPreferences? prefs;
-
-  @override
-  initState() {
-    super.initState();
-    prefs = null;
-    SharedPreferences.getInstance().then((prefs) => setState(() {
-          this.prefs = prefs;
-        }));
-  }
-
-  Widget colorItem({
-    required String name,
-    required Color color,
-  }) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(8.r),
-      onTap: () {
-        prefs?.setInt(PrefKeys.primaryColor, color.value).then((isSuccess) {
-          if (isSuccess) {
-            Navigator.pop(context);
-          } else {
-            Navigator.pop(context);
-          }
-        });
-        PrimaryColorModel.of(context).updatePrimaryColor(color);
-      },
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: 8.r,
-        ),
-        child: Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.r),
-              child: Container(
-                width: 12.r,
-                height: 12.r,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Text(name),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("选择主题色"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          colorItem(
-            name: "妃色",
-            color: const Color(0xFFED5736),
-          ),
-          colorItem(
-            name: "杏黄",
-            color: const Color(0xFFFFA631),
-          ),
-          colorItem(
-            name: "松柏绿",
-            color: const Color(0xFF21A675),
-          ),
-          colorItem(
-            name: "靛青",
-            color: const Color(0xFF177CB0),
-          ),
-          colorItem(
-            name: "藏蓝",
-            color: const Color(0xFF3B2E7E),
-          ),
-          colorItem(
-            name: "紫棠",
-            color: const Color(0xFF56004F),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class GithubAvatar extends StatefulWidget {
-  final String username;
-
-  const GithubAvatar({super.key, required this.username});
-
-  @override
-  State<StatefulWidget> createState() => _GithubAvatar();
-}
-
-class _GithubAvatar extends State<GithubAvatar> {
-  late String url;
-
-  @override
-  void initState() {
-    super.initState();
-
-    url = "https://github.com/identicons/xb.png";
-
-    getGithubAvatar(widget.username).then((value) {
-      setState(() {
-        url = value;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CircleAvatar(
-      backgroundImage: NetworkImage(url),
-    );
-  }
-}
-
-class SettingsDevTeamDialogPage extends StatefulWidget {
-  const SettingsDevTeamDialogPage({super.key});
-
-  @override
-  State<StatefulWidget> createState() => _SettingsDevTeamDialogPage();
-}
-
-class _SettingsDevTeamDialogPage extends State<SettingsDevTeamDialogPage> {
-  late SharedPreferences? prefs;
-
-  @override
-  initState() {
-    super.initState();
-    prefs = null;
-    SharedPreferences.getInstance().then((prefs) => setState(() {
-          this.prefs = prefs;
-        }));
-  }
-
-  Widget githubUser({
-    required String name,
-  }) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(8.r),
-      onTap: () async {
-        var uri = Uri(
-          scheme: "https",
-          host: "github.com",
-          path: name,
-        );
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri);
-        } else {
-          BotToast.showText(text: "Github打开失败");
-        }
-      },
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: 8.r,
-        ),
-        child: Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.r),
-              child: Container(
-                width: 12.r,
-                height: 12.r,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
-                child: GithubAvatar(
-                  username: name,
-                ),
-              ),
-            ),
-            Text(name),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("开发团队"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Flutter开发",
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: Theme.of(context).colorScheme.primary),
-          ),
-          githubUser(name: "liziyi0914"),
-          Text(
-            "数据整理",
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: Theme.of(context).colorScheme.primary),
-          ),
-          githubUser(name: "DefinerSy"),
-        ],
-      ),
-    );
-  }
-}
-
-class LoadingDialog extends StatefulWidget {
-  final String title;
-  final Function(void Function(String))? update;
-  final String? info;
-
-  const LoadingDialog({super.key, required this.title, this.update, this.info});
-
-  @override
-  State<StatefulWidget> createState() => _LoadingDialog();
-}
-
-class _LoadingDialog extends State<LoadingDialog> {
-  late String info;
-
-  @override
-  initState() {
-    super.initState();
-
-    info = widget.info ?? "";
-
-    widget.update?.call((info) {
-      setState(() {
-        this.info = info;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.title),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const CircularProgressIndicator(),
-          Padding(
-            padding: EdgeInsets.only(top: 4.r),
-            child: Text(info),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -339,6 +30,7 @@ class _SettingsPage extends State<SettingsPage> {
   late PackageInfo? packageInfo;
   late SharedPreferences? prefs;
   late String? registrationId;
+  late String? webPushProvider;
 
   late bool enableCalendar;
   late bool enablePush;
@@ -351,6 +43,7 @@ class _SettingsPage extends State<SettingsPage> {
     prefs = null;
     enableCalendar = false;
     enablePush = false;
+    webPushProvider = "_DISABLE";
 
     PackageInfo.fromPlatform().then((info) => setState(() {
           packageInfo = info;
@@ -361,6 +54,16 @@ class _SettingsPage extends State<SettingsPage> {
 
           enableCalendar = prefs.getBool(PrefKeys.enableCalendar) ?? false;
           enablePush = prefs.getBool(PrefKeys.enablePush) ?? false;
+          webPushProvider =
+              prefs.getString(PrefKeys.webPushProvider) ?? "_DISABLE";
+
+          if (PlatformUtils.isWeb) {
+            if (webPushProvider == "HMS") {
+              registrationId = prefs.getString(PrefKeys.webPushProviderHms);
+            } else if (webPushProvider == "FCM") {
+              registrationId = prefs.getString(PrefKeys.webPushProviderFcm);
+            }
+          }
         }));
 
     registrationId = null;
@@ -536,6 +239,110 @@ class _SettingsPage extends State<SettingsPage> {
     }
   }
 
+  Future<void> unsubscribeWebPush() async {
+    switch (webPushProvider) {
+      case "HMS": {
+        var token = prefs?.getString(PrefKeys.webPushProviderHms);
+        if (token == null) {
+          break;
+        }
+        await deleteHmsToken(token).toDart;
+        break;
+      }
+      case "FCM": {
+        var token = prefs?.getString(PrefKeys.webPushProviderFcm);
+        if (token == null) {
+          break;
+        }
+        await deleteFcmToken(token).toDart;
+        break;
+      }
+    }
+  }
+
+  Future<void> updateWebPushState() async {
+    if (SupportUtils.supportPush && PlatformUtils.isWeb) {
+      // 获取权限
+      var status = await Permission.notification.request();
+      if (status.isGranted || status.isProvisional) {
+        String? data = await context.push("/settings/web_push");
+        if (data == null) {
+          return;
+        }
+        switch (data) {
+          case "_DISABLE":
+            {
+              SmartDialog.config.loading = SmartConfigLoading(
+                leastLoadingTime: const Duration(seconds: 1),
+              );
+              SmartDialog.showLoading(msg: "关闭中...");
+
+              await unsubscribeWebPush();
+              setState(() {
+                webPushProvider = data;
+              });
+
+              SmartDialog.dismiss();
+              SmartDialog.config.loading = SmartConfigLoading();
+              break;
+            }
+          case "HMS":
+            {
+              SmartDialog.config.loading = SmartConfigLoading(
+                leastLoadingTime: const Duration(seconds: 1),
+              );
+              SmartDialog.showLoading(msg: "启动中...");
+
+              await unsubscribeWebPush();
+              var token = await getHmsToken().toDart;
+              if (token == null) {
+                BotToast.showText(text: "华为Token获取失败，请重新尝试");
+                break;
+              }
+              prefs?.setString(PrefKeys.webPushProviderHms, token.toDart);
+              setState(() {
+                webPushProvider = data;
+                registrationId = token.toDart;
+              });
+
+              SmartDialog.dismiss();
+              SmartDialog.config.loading = SmartConfigLoading();
+              break;
+            }
+          case "FCM":
+            {
+              SmartDialog.config.loading = SmartConfigLoading(
+                leastLoadingTime: const Duration(seconds: 1),
+              );
+              SmartDialog.showLoading(msg: "启动中...");
+
+              await unsubscribeWebPush();
+              var token = await getFcmToken().toDart;
+              if (token == null) {
+                BotToast.showText(text: "FCM Token获取失败，请重新尝试");
+                break;
+              }
+              prefs?.setString(PrefKeys.webPushProviderFcm, token.toDart);
+              setState(() {
+                webPushProvider = data;
+                registrationId = token.toDart;
+              });
+
+              SmartDialog.dismiss();
+              SmartDialog.config.loading = SmartConfigLoading();
+              break;
+            }
+        }
+      } else if (status.isPermanentlyDenied) {
+        BotToast.showText(text: "请授予通知相关权限");
+      } else {
+        BotToast.showText(text: "请授予通知相关权限");
+      }
+    } else {
+      BotToast.showText(text: "暂时不支持此平台");
+    }
+  }
+
   Future<void> updatePushState(bool state) async {
     if (SupportUtils.supportPush) {
       // 获取权限
@@ -543,6 +350,10 @@ class _SettingsPage extends State<SettingsPage> {
       if (status.isGranted || status.isProvisional) {
         var api = JPushApi();
         await api.setAuth(state);
+        var regId = await api.getRegistrationID();
+        setState(() {
+          registrationId = regId;
+        });
       } else if (status.isPermanentlyDenied) {
         BotToast.showText(text: "请授予通知相关权限");
         openAppSettings();
@@ -644,14 +455,24 @@ class _SettingsPage extends State<SettingsPage> {
                 icon: Icons.send,
                 title: "推送",
                 description: "接收游戏发售提醒推送",
-                extra: Switch(
-                  value: enablePush,
-                  onChanged: (value) async {
-                    await updatePushState(!enablePush);
-                  },
-                ),
+                extra: PlatformUtils.isWeb
+                    ? (Text({
+                        "_DISABLE": "关闭",
+                        "FCM": "FCM",
+                        "HMS": "华为",
+                      }[webPushProvider]!))
+                    : (Switch(
+                        value: enablePush,
+                        onChanged: (value) async {
+                          await updatePushState(!enablePush);
+                        },
+                      )),
                 onTap: () async {
-                  await updatePushState(!enablePush);
+                  if (PlatformUtils.isWeb) {
+                    await updateWebPushState();
+                  } else {
+                    await updatePushState(!enablePush);
+                  }
                 },
               ),
             ),
@@ -664,7 +485,7 @@ class _SettingsPage extends State<SettingsPage> {
                 context: context,
                 icon: Icons.bug_report,
                 title: "Registration ID",
-                description: registrationId ?? "",
+                description: registrationId ?? "未开启",
                 onTap: () async {
                   Clipboard.setData(ClipboardData(text: registrationId ?? ""));
                   BotToast.showText(text: "复制成功");

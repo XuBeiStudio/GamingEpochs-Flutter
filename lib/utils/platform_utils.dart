@@ -47,7 +47,7 @@ class PlatformUtils {
 
 class SupportUtils {
   static bool _supportPush() {
-    return PlatformUtils.isAndroid;
+    return PlatformUtils.isAndroid || PlatformUtils.isWeb;
   }
 
   static bool _supportCalendar() {
