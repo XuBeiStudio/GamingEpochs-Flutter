@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../platforms/web_push/web.dart';
+import '../platforms/web_push/other.dart' if (PlatformUtils.isWeb) '../platforms/web_push/web.dart';
 import '../constants.dart';
 import '../dialogs/loading_dialog.dart';
 import '../pigeons/calendar.dart';
@@ -239,27 +237,6 @@ class _SettingsPage extends State<SettingsPage> {
     }
   }
 
-  Future<void> unsubscribeWebPush() async {
-    switch (webPushProvider) {
-      case "HMS": {
-        var token = prefs?.getString(PrefKeys.webPushProviderHms);
-        if (token == null) {
-          break;
-        }
-        await deleteHmsToken(token).toDart;
-        break;
-      }
-      case "FCM": {
-        var token = prefs?.getString(PrefKeys.webPushProviderFcm);
-        if (token == null) {
-          break;
-        }
-        await deleteFcmToken(token).toDart;
-        break;
-      }
-    }
-  }
-
   Future<void> updateWebPushState() async {
     if (SupportUtils.supportPush && PlatformUtils.isWeb) {
       // 获取权限
@@ -277,7 +254,7 @@ class _SettingsPage extends State<SettingsPage> {
               );
               SmartDialog.showLoading(msg: "关闭中...");
 
-              await unsubscribeWebPush();
+              await unsubscribeWebPush(webPushProvider, prefs);
               setState(() {
                 webPushProvider = data;
               });
@@ -293,16 +270,16 @@ class _SettingsPage extends State<SettingsPage> {
               );
               SmartDialog.showLoading(msg: "启动中...");
 
-              await unsubscribeWebPush();
-              var token = await getHmsToken().toDart;
+              await unsubscribeWebPush(webPushProvider, prefs);
+              var token = await getHmsTokenWrapped();
               if (token == null) {
                 BotToast.showText(text: "华为Token获取失败，请重新尝试");
                 break;
               }
-              prefs?.setString(PrefKeys.webPushProviderHms, token.toDart);
+              prefs?.setString(PrefKeys.webPushProviderHms, token);
               setState(() {
                 webPushProvider = data;
-                registrationId = token.toDart;
+                registrationId = token;
               });
 
               SmartDialog.dismiss();
@@ -316,16 +293,16 @@ class _SettingsPage extends State<SettingsPage> {
               );
               SmartDialog.showLoading(msg: "启动中...");
 
-              await unsubscribeWebPush();
-              var token = await getFcmToken().toDart;
+              await unsubscribeWebPush(webPushProvider, prefs);
+              var token = await getFcmTokenWrapped();
               if (token == null) {
                 BotToast.showText(text: "FCM Token获取失败，请重新尝试");
                 break;
               }
-              prefs?.setString(PrefKeys.webPushProviderFcm, token.toDart);
+              prefs?.setString(PrefKeys.webPushProviderFcm, token);
               setState(() {
                 webPushProvider = data;
-                registrationId = token.toDart;
+                registrationId = token;
               });
 
               SmartDialog.dismiss();
