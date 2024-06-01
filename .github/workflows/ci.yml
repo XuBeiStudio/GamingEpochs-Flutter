@@ -138,6 +138,7 @@ jobs:
         with:
           node-version: 18
           cache: 'yarn'
+          cache-dependency-path: web-project/yarn.lock
 
       - name: Get Version 💯
         run: |
